@@ -5,16 +5,18 @@ import { toast } from "react-toastify";
 
 import axiosInstance from "../../../api/ConfigApi";
 import { useNavigate } from "react-router-dom";
+import { useLogin } from "../../../context/authContext";
 
 function FormSig() {
   const [usuarioconectado, setusuarioconectado] = useState(false);
+  const {UsuarioLog} =useLogin()
   const navi = useNavigate();
 useEffect(() => {
-  if(usuarioconectado){
-    navi('Dashboard')
+  if(usuarioconectado.length!==0){
+    navi('/User')
   }
  
-}, [usuarioconectado,navi]);
+}, [usuarioconectado,navi,UsuarioLog]);
   return (
     <div className="">
       <Formik
@@ -26,7 +28,7 @@ useEffect(() => {
           try {
             const respuesta = await axiosInstance.post("api/SignIn", values);
             if (respuesta.data.loged) {
-              localStorage.setItem("token", respuesta.data.token);
+              localStorage.setItem("token_docent", respuesta.data.token);
               localStorage.setItem("User", JSON.stringify(respuesta.data.user) );
 
               toast.success(`Usuario Iniciado ${respuesta.data.user.nombre}`);
