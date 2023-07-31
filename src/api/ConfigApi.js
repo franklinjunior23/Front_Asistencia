@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
   });
   
   axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token"); // Obtener el token almacenado en el localStorage
+    const token = localStorage.getItem("token_docent"); // Obtener el token almacenado en el localStorage
     if (token) {
       config.headers["Validation"] = token; // Agregar el token al encabezado de la solicitud
     }

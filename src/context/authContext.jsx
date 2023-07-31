@@ -1,64 +1,55 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
-import PropTypes from "prop-types";
 
-const LogeadoDate = createContext();
-export const useLogin = () => {
-  const dat = useContext(LogeadoDate);
-  return dat;
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  return useContext(AuthContext);
 };
 
-export const DateLoginProvider = ({ children }) => {
-  const UserLocalstore = JSON.parse(localStorage.getItem("User")) || [];
-  const [UsuarioLog, setUsuarioLog] = useState(UserLocalstore);
-
+export const AuthProvider = ({ children }) => {
+  const [UsuarioLog, setUsuarioLog] = useState({});
   const [ExistLoget, setExistLoget] = useState(false);
 
-  const AddUser = (datos) => {
-    setUsuarioLog(datos);
-    localStorage.setItem("User", JSON.stringify(datos));
-  };
-  const CerrarSeccion = () => {
-    setUsuarioLog([]);
-    localStorage.removeItem("User");
-    localStorage.removeItem("token_docent");
-  };
   const Verifi = () => {
     const token = localStorage.getItem("token_docent");
-    const User = localStorage.getItem("User");
-    if ((token, User !== 0)) {
-      setExistLoget(!!token);
+    const user = JSON.parse(localStorage.getItem("User_docente"));
+
+    if (token && user) {
+      setUsuarioLog(user);
+      setExistLoget(true);
+    } else {
+      setUsuarioLog(null);
+      setExistLoget(false);
     }
   };
-  const handleStorageChange = (e) => {
-    if (e.key === "User") {
-      // Actualizar el estado userData cuando cambie el valor en el localStorage
-      setUsuarioLog(JSON.parse(e.User));
-    }
-  };
+
   useEffect(() => {
     Verifi();
   }, []);
 
   useEffect(() => {
-    // Agregar el listener para el evento storage
-    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(Verifi, 5000); // Verificar cada 5 segundos
+  
+    return () => clearInterval(interval);
+  }, [ExistLoget]); // Agrega ExistLoget al arreglo de dependencias
 
-    return () => {
-      // Remover el listener cuando el componente se desmonte
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [UsuarioLog,ExistLoget]);
+  const AddUser = (userData) => {
+    setUsuarioLog(userData);
+    localStorage.setItem("User_docente", JSON.stringify(userData));
+  };
+
+  const CerrarSesion = () => {
+    setUsuarioLog(null);
+    setExistLoget(false);
+    localStorage.removeItem("User_docente");
+    localStorage.removeItem("token_docent");
+  };
 
   return (
-    <LogeadoDate.Provider
-      value={{ UsuarioLog, ExistLoget, AddUser, CerrarSeccion }}
+    <AuthContext.Provider
+      value={{ UsuarioLog, ExistLoget, AddUser, CerrarSesion }}
     >
       {children}
-    </LogeadoDate.Provider>
+    </AuthContext.Provider>
   );
-};
-
-DateLoginProvider.propTypes = {
-  children: PropTypes.node.isRequired,
 };

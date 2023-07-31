@@ -5,18 +5,18 @@ import { toast } from "react-toastify";
 
 import axiosInstance from "../../../api/ConfigApi";
 import { useNavigate } from "react-router-dom";
-import { useLogin } from "../../../context/authContext";
+import { useAuth } from "../../../context/authContext";
 
 function FormSig() {
-  const [usuarioconectado, setusuarioconectado] = useState(false);
-  const {UsuarioLog} =useLogin()
+  const { AddUser, ExistLoget } = useAuth();
   const navi = useNavigate();
-useEffect(() => {
-  if(usuarioconectado.length!==0){
-    navi('/User')
-  }
- 
-}, [usuarioconectado,navi,UsuarioLog]);
+const [CargaSubmit, setCargaSubmit] = useState(false);
+  useEffect(() => {
+    if (ExistLoget) {
+      navi("/User");
+    }
+  }, [ExistLoget, navi]);
+
   return (
     <div className="">
       <Formik
@@ -26,26 +26,34 @@ useEffect(() => {
         }}
         onSubmit={async (values) => {
           try {
+            setCargaSubmit(true)
             const respuesta = await axiosInstance.post("api/SignIn", values);
             if (respuesta.data.loged) {
-              localStorage.setItem("token_docent", respuesta.data.token);
-              localStorage.setItem("User", JSON.stringify(respuesta.data.user) );
-
-              toast.success(`Usuario Iniciado ${respuesta.data.user.nombre}`);
               setTimeout(() => {
-                setusuarioconectado(true)
-              }, 4000); 
+                localStorage.setItem("token_docent", respuesta.data.token);
+                toast.success(`Usuario Iniciado ${respuesta.data.user.nombre}`);
+                AddUser(respuesta.data.user);
+                setCargaSubmit(false)
+              }, 4000);
             } else {
-              toast.error("Ingrese de manera correcta sus datos");
+              setTimeout(() => {
+                toast.error("Ingrese de manera correcta sus datos");
+               setCargaSubmit(false)
+              }, 4000);
+              
             }
           } catch (error) {
-            toast.error(
-              "Error en el Servidor , comuniquese con el Administrador"
-            );
+            setTimeout(() => {
+              toast.error(
+                "Error en el Servidor , comuniquese con el Administrador"
+              );
+              setCargaSubmit(false)
+            }, 4000);
+            
           }
         }}
       >
-        {({ handleChange, handleSubmit, values, isSubmitting }) => (
+        {({ handleChange, handleSubmit, values }) => (
           <Form onSubmit={handleSubmit}>
             <label className="block text-white text-lg my-2 tracking-wide	">
               Usuario
@@ -63,7 +71,7 @@ useEffect(() => {
             </label>
             <input
               name="contraseña"
-              type="text"
+              type="password"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="ingrese su contraseña"
               onChange={handleChange}
@@ -72,9 +80,9 @@ useEffect(() => {
             <button
               type="submit"
               className="bg-blue-700 text-white px-5 py-2 mt-6 rounded-xl text-lg "
-              disabled={isSubmitting}
+              disabled={CargaSubmit}
             >
-              {isSubmitting ? "Comprobando ...." : "Iniciar Seccion"}
+              {CargaSubmit ? "Comprobando ...." : "Iniciar Seccion"}
             </button>
           </Form>
         )}

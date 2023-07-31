@@ -16,9 +16,9 @@ function Hora() {
     const seconds = time.getSeconds().toString().padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
   };
-  return <section>
-    <h2>Hora Dinamico</h2>
-    <span>{formatTime(time)}</span>
+  return <section className="w-full grid place-content-center text-center py-2 px-3 ">
+    <h2 >Hora Dinamico</h2>
+    <span className="text-center text-[70px] font-medium tracking-wider">{formatTime(time)}</span>
   </section>;
 }
 
